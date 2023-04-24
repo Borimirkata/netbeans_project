@@ -148,3 +148,11 @@ nav{
 	margin-left:520px;
 	width:300px;
 }
+#submit{
+	position:center;
+	margin-left:630px;
+
+}
+.hello{
+	display:grid;
+}
