@@ -7,6 +7,7 @@
 import java.io.IOException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,44 +19,41 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@WebServlet(urlPatterns = {"/RegisterServlet"})
-public class RegisterServlet extends HttpServlet {
+@WebServlet(urlPatterns = {"/ItemsServlet"})
+public class ItemsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-    
-	String r = """
-                   <!DOCTYPE html>
-                   <html>
-                     <head>
-                         <title>Register</title>
-                     </head>
-                     <body>
-                         <p>Registration successful.</p>
-                     </body>
-                   </html>
-                   """;
-                   
+         Cookie[] cookies = request.getCookies();
+         String username = "";
+         for(Cookie c : cookies){
+             String n =c.getName();
+             if(n.equals("name")){
+                 username=c.getValue();
+             }
+         }
+         response.getWriter().println("Hello "+username);
 	 String db = "jdbc:mariadb://localhost/basket7";
-         String reqName=request.getParameter("name");
-         String reqPass=request.getParameter("pass");
-         String reqMail=request.getParameter("mail");
 
         try {
             Class.forName("org.mariadb.jdbc.Driver");
             Connection conn  = DriverManager.getConnection(db);
              Statement stmt = conn.createStatement();
             String query = """
-                    INSERT INTO potrebiteli(name,pass,mail)
-                    VALUES (\"%s\", \"%s\", \"%s\");
-                           """.formatted(reqName,reqPass,reqMail);
+                    SELECT * FROM potrebiteli;
+                           """;
             ResultSet rs = stmt.executeQuery(query);
-     
+            conn.close();
+            while(rs.next()){
+                int id = rs.getInt(1);
+                String name=rs.getString(2);
+                String pass=rs.getString(3);
+                String mail=rs.getString(4);
+            }
         } catch (SQLException ex) {
-            Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ItemsServlet.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(RegisterServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ItemsServlet.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-       response.getWriter().println(r);
     }
 }
